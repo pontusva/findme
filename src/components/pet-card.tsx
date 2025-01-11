@@ -32,7 +32,7 @@ export function PetCard({ pet }: PetCardProps) {
         <div className="mt-2 flex flex-wrap gap-2">
           <Badge variant="secondary">{pet.pet.type}</Badge>
           <Badge variant="outline">
-            {pet.pet.breed} BREED
+            {pet.pet.breed}
           </Badge>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
