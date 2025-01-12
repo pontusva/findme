@@ -160,6 +160,12 @@ export type Notification = {
   userId: Scalars['String']['output'];
 };
 
+export type NotificationsPayload = {
+  __typename?: 'NotificationsPayload';
+  latestNotifications: Array<Notification>;
+  newNotification: Notification;
+};
+
 export type Pet = {
   __typename?: 'Pet';
   age?: Maybe<Scalars['Int']['output']>;
@@ -258,6 +264,16 @@ export type ReportStatus = {
   status: Scalars['String']['output'];
   updatedBy: Scalars['String']['output'];
   updater: User;
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  notifications?: Maybe<NotificationsPayload>;
+};
+
+
+export type SubscriptionNotificationsArgs = {
+  userId: Scalars['String']['input'];
 };
 
 export type User = {
@@ -369,7 +385,14 @@ export type NotificationsQueryVariables = Exact<{
 }>;
 
 
-export type NotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, userId: string, senderId?: string, read: boolean }> };
+export type NotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, sender?: { __typename?: 'User', email: string, name: string } }> };
+
+export type NotificationsSubscriptionSubscriptionVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications?: { __typename?: 'NotificationsPayload', latestNotifications: Array<{ __typename?: 'Notification', id: string, message: string, sender?: { __typename?: 'User', name: string, email: string } }>, newNotification: { __typename?: 'Notification', message: string, id: string, sender?: { __typename?: 'User', name: string, email: string } } } };
 
 
 export const CreateLocationDocument = gql`
@@ -918,9 +941,10 @@ export const NotificationsDocument = gql`
   notifications(userId: $userId) {
     id
     message
-    userId
-    senderId
-    read
+    sender {
+      email
+      name
+    }
   }
 }
     `;
@@ -957,3 +981,48 @@ export type NotificationsQueryHookResult = ReturnType<typeof useNotificationsQue
 export type NotificationsLazyQueryHookResult = ReturnType<typeof useNotificationsLazyQuery>;
 export type NotificationsSuspenseQueryHookResult = ReturnType<typeof useNotificationsSuspenseQuery>;
 export type NotificationsQueryResult = Apollo.QueryResult<NotificationsQuery, NotificationsQueryVariables>;
+export const NotificationsSubscriptionDocument = gql`
+    subscription NotificationsSubscription($userId: String!) {
+  notifications(userId: $userId) {
+    latestNotifications {
+      id
+      message
+      sender {
+        name
+        email
+      }
+    }
+    newNotification {
+      message
+      id
+      sender {
+        name
+        email
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useNotificationsSubscriptionSubscription__
+ *
+ * To run a query within a React component, call `useNotificationsSubscriptionSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNotificationsSubscriptionSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotificationsSubscriptionSubscription({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useNotificationsSubscriptionSubscription(baseOptions: Apollo.SubscriptionHookOptions<NotificationsSubscriptionSubscription, NotificationsSubscriptionSubscriptionVariables> & ({ variables: NotificationsSubscriptionSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<NotificationsSubscriptionSubscription, NotificationsSubscriptionSubscriptionVariables>(NotificationsSubscriptionDocument, options);
+      }
+export type NotificationsSubscriptionSubscriptionHookResult = ReturnType<typeof useNotificationsSubscriptionSubscription>;
+export type NotificationsSubscriptionSubscriptionResult = Apollo.SubscriptionResult<NotificationsSubscriptionSubscription>;

@@ -26,7 +26,9 @@ gql`
 
 export const useCreateNotification = () => {
   const [createNotification, { loading, error }] =
-    useCreateNotificationMutation()
+    useCreateNotificationMutation({
+      refetchQueries: ['Notifications']
+    })
 
   return { createNotification, loading, error }
 }

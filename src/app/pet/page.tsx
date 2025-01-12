@@ -54,19 +54,7 @@ export default function PetDetailsPage() {
                   Owner Information
                 </h2>
                 <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarImage
-                      src={user?.imageUrl}
-                      alt={user?.fullName || ''}
-                    />
-                    <AvatarFallback>
-                      {user?.fullName
-                        ?.split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{user?.fullName}</span>
+                  <span>{data?.getPet.owner?.name}</span>
                 </div>
               </div>
               <div>
