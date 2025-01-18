@@ -50,16 +50,16 @@ const ChatWindowNew: React.FC<ChatWindowProps> = ({
           messages.map((message, index) => (
             <div
               key={message.id + index}
-              className={`mb-2 ${
-                message.receiverId === userId ? "text-right" : "text-left"
+              className={`mb-2 flex ${
+                message.senderId === userId ? "justify-end" : "justify-start"
               }`}
             >
               <span
-                className={`inline-block p-2 rounded-lg ${
-                  message.receiverId === userId
+                className={`inline-block p-2 max-w-xs rounded-lg ${
+                  message.senderId === userId
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-black"
-                }`}
+                } overflow-wrap break-word break-all`}
               >
                 {message.content}
               </span>
