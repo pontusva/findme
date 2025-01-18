@@ -1,9 +1,5 @@
 import React from "react";
 import { ChatPartner } from "@/data/useGetChatPartners";
-interface User {
-  id: number;
-  name: string;
-}
 
 interface UserListProps {
   users: ChatPartner[];
