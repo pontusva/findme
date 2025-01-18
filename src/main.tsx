@@ -24,6 +24,8 @@ import LostPetContactPage from "./app/lost-pet-contact/page.tsx";
 import NotificationSettingsPage from "./app/settings/notifications/page.tsx";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { ReactNode, useMemo } from "react";
+import { setContext } from "@apollo/client/link/context";
+import { ChatProvider } from "./context/ChatProvider.tsx";
 
 if ("serviceWorker" in navigator) {
   try {
@@ -79,21 +81,32 @@ const ApolloClientProvider: React.FC<ApolloClientProviderProps> = ({
     return new GraphQLWsLink(client);
   }, [getToken, sessionId]);
 
+  const authLink = setContext(async (_, { headers }) => {
+    // Get the authentication token from Clerk
+
+    // Return the headers to the context so httpLink can read them
+    return {
+      headers: {
+        ...headers,
+        authorization: sessionId ? `${sessionId}` : "", // Attach the token
+      },
+    };
+  });
+
   // Use split to direct operations to the appropriate link
   const splitLink = useMemo(() => {
     return split(
       ({ query }) => {
         const definition = getMainDefinition(query);
-        console.log("Routing operation:", definition); // Log routing logic
         return (
           definition.kind === "OperationDefinition" &&
           definition.operation === "subscription"
         );
       },
-      wsLink,
-      uploadLink
+      authLink.concat(wsLink),
+      authLink.concat(uploadLink)
     );
-  }, [wsLink, uploadLink]);
+  }, [wsLink, uploadLink, authLink]);
 
   // Initialize Apollo Client with the combined link
   const client = useMemo(() => {
@@ -119,21 +132,26 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <BrowserRouter>
         <ApolloClientProvider>
-          <Routes>
-            <Route path="/" element={<App />}>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="report" element={<RegisterLostPetPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/my-pets" element={<LostPetsPage />} />
-              <Route path="/pets/:id" element={<PetPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route
-                path="/lost-pets-contact/:id"
-                element={<LostPetContactPage />}
-              />
-              <Route path="/settings" element={<NotificationSettingsPage />} />
-            </Route>
-          </Routes>
+          <ChatProvider>
+            <Routes>
+              <Route path="/" element={<App />}>
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="report" element={<RegisterLostPetPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/my-pets" element={<LostPetsPage />} />
+                <Route path="/pets/:id" element={<PetPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route
+                  path="/lost-pets-contact/:id"
+                  element={<LostPetContactPage />}
+                />
+                <Route
+                  path="/settings"
+                  element={<NotificationSettingsPage />}
+                />
+              </Route>
+            </Routes>
+          </ChatProvider>
         </ApolloClientProvider>
       </BrowserRouter>
     </ClerkProvider>

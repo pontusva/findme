@@ -24,6 +24,14 @@ export type AuthResponse = {
   userId: Scalars['String']['output'];
 };
 
+export type ChatPartner = {
+  __typename?: 'ChatPartner';
+  partner: User;
+  partnerId: Scalars['String']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
 export type FoundPet = {
   __typename?: 'FoundPet';
   description?: Maybe<Scalars['String']['output']>;
@@ -69,6 +77,14 @@ export type LostPetReport = {
   statuses: Array<ReportStatus>;
 };
 
+export type Message = {
+  __typename?: 'Message';
+  content: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  receiverId: Scalars['String']['output'];
+  senderId: Scalars['String']['output'];
+};
+
 export type Microchip = {
   __typename?: 'Microchip';
   chipNumber: Scalars['String']['output'];
@@ -79,14 +95,23 @@ export type Microchip = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createChatPartner: ChatPartner;
   createLocation: Location;
   createLostPetReport: LostPetReport;
   createNotification: Notification;
   createPet?: Maybe<Pet>;
   createUser: User;
+  deleteChatPartner: ChatPartner;
   login: AuthResponse;
   logout: Logout;
+  sendMessage?: Maybe<Message>;
   updateLostPetReport: LostPetReport;
+};
+
+
+export type MutationCreateChatPartnerArgs = {
+  partnerId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
 };
 
 
@@ -113,6 +138,7 @@ export type MutationCreateNotificationArgs = {
   message: Scalars['String']['input'];
   name: Scalars['String']['input'];
   phone: Scalars['String']['input'];
+  senderId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
 };
 
@@ -136,9 +162,22 @@ export type MutationCreateUserArgs = {
 };
 
 
+export type MutationDeleteChatPartnerArgs = {
+  partnerId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+
 export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
+};
+
+
+export type MutationSendMessageArgs = {
+  content: Scalars['String']['input'];
+  receiverId: Scalars['String']['input'];
+  senderId: Scalars['String']['input'];
 };
 
 
@@ -215,6 +254,8 @@ export type Query = {
   getAllLostPetReports: Array<LostPetReport>;
   getAllLostPets: Array<LostPetReport>;
   getAllUsers: Array<User>;
+  getChatMessages: Array<Message>;
+  getChatPartners: Array<ChatPartner>;
   getFilteredPets: Array<Maybe<LostPetReport>>;
   getLostPetReport: LostPetReport;
   getPet: Pet;
@@ -222,6 +263,16 @@ export type Query = {
   getUser: User;
   getUserPets: Array<Pet>;
   notifications: Array<Notification>;
+};
+
+
+export type QueryGetChatMessagesArgs = {
+  chatId: Scalars['String']['input'];
+};
+
+
+export type QueryGetChatPartnersArgs = {
+  userId: Scalars['String']['input'];
 };
 
 
@@ -268,7 +319,13 @@ export type ReportStatus = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  message?: Maybe<Message>;
   notifications?: Maybe<NotificationsPayload>;
+};
+
+
+export type SubscriptionMessageArgs = {
+  chatId: Scalars['String']['input'];
 };
 
 
@@ -289,6 +346,14 @@ export type User = {
   reports: Array<LostPetReport>;
   statusUpdates: Array<ReportStatus>;
 };
+
+export type CreateChatPartnerMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+  partnerId: Scalars['String']['input'];
+}>;
+
+
+export type CreateChatPartnerMutation = { __typename?: 'Mutation', createChatPartner: { __typename?: 'ChatPartner', partnerId: string, userId: string } };
 
 export type CreateLocationMutationVariables = Exact<{
   latitude: Scalars['Float']['input'];
@@ -317,6 +382,7 @@ export type CreateNotificationMutationVariables = Exact<{
   email: Scalars['String']['input'];
   phone: Scalars['String']['input'];
   message: Scalars['String']['input'];
+  senderId: Scalars['String']['input'];
 }>;
 
 
@@ -346,6 +412,20 @@ export type GetAllUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetAllUsersQuery = { __typename?: 'Query', getAllUsers: Array<{ __typename?: 'User', email: string, id: string }> };
+
+export type GetChatMessagesQueryVariables = Exact<{
+  chatId: Scalars['String']['input'];
+}>;
+
+
+export type GetChatMessagesQuery = { __typename?: 'Query', getChatMessages: Array<{ __typename?: 'Message', content: string, id: string, senderId: string }> };
+
+export type GetChatPartnersQueryVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type GetChatPartnersQuery = { __typename?: 'Query', getChatPartners: Array<{ __typename?: 'ChatPartner', partnerId: string, userId: string, partner: { __typename?: 'User', name: string }, user: { __typename?: 'User', name: string } }> };
 
 export type GetFilteredPetsQueryVariables = Exact<{
   searchTerm?: InputMaybe<Scalars['String']['input']>;
@@ -380,21 +460,72 @@ export type GetUserPetsQueryVariables = Exact<{
 
 export type GetUserPetsQuery = { __typename?: 'Query', getUserPets: Array<{ __typename?: 'Pet', type: string, id: string, name: string, photoUrl?: string, lostReports: Array<{ __typename?: 'LostPetReport', status: string }> }> };
 
+export type MessageSubscriptionVariables = Exact<{
+  chatId: Scalars['String']['input'];
+}>;
+
+
+export type MessageSubscription = { __typename?: 'Subscription', message?: { __typename?: 'Message', id: string, content: string, senderId: string } };
+
 export type NotificationsQueryVariables = Exact<{
   userId: Scalars['String']['input'];
 }>;
 
 
-export type NotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, sender?: { __typename?: 'User', email: string, name: string } }> };
+export type NotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, senderId?: string, userId: string, sender?: { __typename?: 'User', email: string, name: string } }> };
 
 export type NotificationsSubscriptionSubscriptionVariables = Exact<{
   userId: Scalars['String']['input'];
 }>;
 
 
-export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications?: { __typename?: 'NotificationsPayload', latestNotifications: Array<{ __typename?: 'Notification', id: string, message: string, sender?: { __typename?: 'User', name: string, email: string } }>, newNotification: { __typename?: 'Notification', message: string, id: string, sender?: { __typename?: 'User', name: string, email: string } } } };
+export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications?: { __typename?: 'NotificationsPayload', latestNotifications: Array<{ __typename?: 'Notification', id: string, message: string, userId: string, senderId?: string, sender?: { __typename?: 'User', name: string, email: string } }>, newNotification: { __typename?: 'Notification', message: string, id: string, userId: string, senderId?: string, sender?: { __typename?: 'User', name: string, email: string } } } };
+
+export type SendMessageMutationVariables = Exact<{
+  content: Scalars['String']['input'];
+  receiverId: Scalars['String']['input'];
+  senderId: Scalars['String']['input'];
+}>;
 
 
+export type SendMessageMutation = { __typename?: 'Mutation', sendMessage?: { __typename?: 'Message', content: string, id: string, senderId: string } };
+
+
+export const CreateChatPartnerDocument = gql`
+    mutation CreateChatPartner($userId: String!, $partnerId: String!) {
+  createChatPartner(userId: $userId, partnerId: $partnerId) {
+    partnerId
+    userId
+  }
+}
+    `;
+export type CreateChatPartnerMutationFn = Apollo.MutationFunction<CreateChatPartnerMutation, CreateChatPartnerMutationVariables>;
+
+/**
+ * __useCreateChatPartnerMutation__
+ *
+ * To run a mutation, you first call `useCreateChatPartnerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateChatPartnerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createChatPartnerMutation, { data, loading, error }] = useCreateChatPartnerMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      partnerId: // value for 'partnerId'
+ *   },
+ * });
+ */
+export function useCreateChatPartnerMutation(baseOptions?: Apollo.MutationHookOptions<CreateChatPartnerMutation, CreateChatPartnerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateChatPartnerMutation, CreateChatPartnerMutationVariables>(CreateChatPartnerDocument, options);
+      }
+export type CreateChatPartnerMutationHookResult = ReturnType<typeof useCreateChatPartnerMutation>;
+export type CreateChatPartnerMutationResult = Apollo.MutationResult<CreateChatPartnerMutation>;
+export type CreateChatPartnerMutationOptions = Apollo.BaseMutationOptions<CreateChatPartnerMutation, CreateChatPartnerMutationVariables>;
 export const CreateLocationDocument = gql`
     mutation CreateLocation($latitude: Float!, $longitude: Float!, $address: String, $foundPetId: String, $lostReportId: String) {
   createLocation(
@@ -488,13 +619,14 @@ export type CreateLostPetReportMutationHookResult = ReturnType<typeof useCreateL
 export type CreateLostPetReportMutationResult = Apollo.MutationResult<CreateLostPetReportMutation>;
 export type CreateLostPetReportMutationOptions = Apollo.BaseMutationOptions<CreateLostPetReportMutation, CreateLostPetReportMutationVariables>;
 export const CreateNotificationDocument = gql`
-    mutation CreateNotification($userId: String!, $name: String!, $email: String!, $phone: String!, $message: String!) {
+    mutation CreateNotification($userId: String!, $name: String!, $email: String!, $phone: String!, $message: String!, $senderId: String!) {
   createNotification(
     userId: $userId
     name: $name
     email: $email
     phone: $phone
     message: $message
+    senderId: $senderId
   ) {
     id
     message
@@ -523,6 +655,7 @@ export type CreateNotificationMutationFn = Apollo.MutationFunction<CreateNotific
  *      email: // value for 'email'
  *      phone: // value for 'phone'
  *      message: // value for 'message'
+ *      senderId: // value for 'senderId'
  *   },
  * });
  */
@@ -684,6 +817,95 @@ export type GetAllUsersQueryHookResult = ReturnType<typeof useGetAllUsersQuery>;
 export type GetAllUsersLazyQueryHookResult = ReturnType<typeof useGetAllUsersLazyQuery>;
 export type GetAllUsersSuspenseQueryHookResult = ReturnType<typeof useGetAllUsersSuspenseQuery>;
 export type GetAllUsersQueryResult = Apollo.QueryResult<GetAllUsersQuery, GetAllUsersQueryVariables>;
+export const GetChatMessagesDocument = gql`
+    query GetChatMessages($chatId: String!) {
+  getChatMessages(chatId: $chatId) {
+    content
+    id
+    senderId
+  }
+}
+    `;
+
+/**
+ * __useGetChatMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetChatMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatMessagesQuery({
+ *   variables: {
+ *      chatId: // value for 'chatId'
+ *   },
+ * });
+ */
+export function useGetChatMessagesQuery(baseOptions: Apollo.QueryHookOptions<GetChatMessagesQuery, GetChatMessagesQueryVariables> & ({ variables: GetChatMessagesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatMessagesQuery, GetChatMessagesQueryVariables>(GetChatMessagesDocument, options);
+      }
+export function useGetChatMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatMessagesQuery, GetChatMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatMessagesQuery, GetChatMessagesQueryVariables>(GetChatMessagesDocument, options);
+        }
+export function useGetChatMessagesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetChatMessagesQuery, GetChatMessagesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetChatMessagesQuery, GetChatMessagesQueryVariables>(GetChatMessagesDocument, options);
+        }
+export type GetChatMessagesQueryHookResult = ReturnType<typeof useGetChatMessagesQuery>;
+export type GetChatMessagesLazyQueryHookResult = ReturnType<typeof useGetChatMessagesLazyQuery>;
+export type GetChatMessagesSuspenseQueryHookResult = ReturnType<typeof useGetChatMessagesSuspenseQuery>;
+export type GetChatMessagesQueryResult = Apollo.QueryResult<GetChatMessagesQuery, GetChatMessagesQueryVariables>;
+export const GetChatPartnersDocument = gql`
+    query GetChatPartners($userId: String!) {
+  getChatPartners(userId: $userId) {
+    partner {
+      name
+    }
+    user {
+      name
+    }
+    partnerId
+    userId
+  }
+}
+    `;
+
+/**
+ * __useGetChatPartnersQuery__
+ *
+ * To run a query within a React component, call `useGetChatPartnersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatPartnersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatPartnersQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetChatPartnersQuery(baseOptions: Apollo.QueryHookOptions<GetChatPartnersQuery, GetChatPartnersQueryVariables> & ({ variables: GetChatPartnersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatPartnersQuery, GetChatPartnersQueryVariables>(GetChatPartnersDocument, options);
+      }
+export function useGetChatPartnersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatPartnersQuery, GetChatPartnersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatPartnersQuery, GetChatPartnersQueryVariables>(GetChatPartnersDocument, options);
+        }
+export function useGetChatPartnersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetChatPartnersQuery, GetChatPartnersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetChatPartnersQuery, GetChatPartnersQueryVariables>(GetChatPartnersDocument, options);
+        }
+export type GetChatPartnersQueryHookResult = ReturnType<typeof useGetChatPartnersQuery>;
+export type GetChatPartnersLazyQueryHookResult = ReturnType<typeof useGetChatPartnersLazyQuery>;
+export type GetChatPartnersSuspenseQueryHookResult = ReturnType<typeof useGetChatPartnersSuspenseQuery>;
+export type GetChatPartnersQueryResult = Apollo.QueryResult<GetChatPartnersQuery, GetChatPartnersQueryVariables>;
 export const GetFilteredPetsDocument = gql`
     query GetFilteredPets($searchTerm: String) {
   getFilteredPets(searchTerm: $searchTerm) {
@@ -936,11 +1158,45 @@ export type GetUserPetsQueryHookResult = ReturnType<typeof useGetUserPetsQuery>;
 export type GetUserPetsLazyQueryHookResult = ReturnType<typeof useGetUserPetsLazyQuery>;
 export type GetUserPetsSuspenseQueryHookResult = ReturnType<typeof useGetUserPetsSuspenseQuery>;
 export type GetUserPetsQueryResult = Apollo.QueryResult<GetUserPetsQuery, GetUserPetsQueryVariables>;
+export const MessageDocument = gql`
+    subscription Message($chatId: String!) {
+  message(chatId: $chatId) {
+    id
+    content
+    senderId
+  }
+}
+    `;
+
+/**
+ * __useMessageSubscription__
+ *
+ * To run a query within a React component, call `useMessageSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useMessageSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMessageSubscription({
+ *   variables: {
+ *      chatId: // value for 'chatId'
+ *   },
+ * });
+ */
+export function useMessageSubscription(baseOptions: Apollo.SubscriptionHookOptions<MessageSubscription, MessageSubscriptionVariables> & ({ variables: MessageSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<MessageSubscription, MessageSubscriptionVariables>(MessageDocument, options);
+      }
+export type MessageSubscriptionHookResult = ReturnType<typeof useMessageSubscription>;
+export type MessageSubscriptionResult = Apollo.SubscriptionResult<MessageSubscription>;
 export const NotificationsDocument = gql`
     query Notifications($userId: String!) {
   notifications(userId: $userId) {
     id
     message
+    senderId
+    userId
     sender {
       email
       name
@@ -987,6 +1243,8 @@ export const NotificationsSubscriptionDocument = gql`
     latestNotifications {
       id
       message
+      userId
+      senderId
       sender {
         name
         email
@@ -995,6 +1253,8 @@ export const NotificationsSubscriptionDocument = gql`
     newNotification {
       message
       id
+      userId
+      senderId
       sender {
         name
         email
@@ -1026,3 +1286,40 @@ export function useNotificationsSubscriptionSubscription(baseOptions: Apollo.Sub
       }
 export type NotificationsSubscriptionSubscriptionHookResult = ReturnType<typeof useNotificationsSubscriptionSubscription>;
 export type NotificationsSubscriptionSubscriptionResult = Apollo.SubscriptionResult<NotificationsSubscriptionSubscription>;
+export const SendMessageDocument = gql`
+    mutation SendMessage($content: String!, $receiverId: String!, $senderId: String!) {
+  sendMessage(content: $content, receiverId: $receiverId, senderId: $senderId) {
+    content
+    id
+    senderId
+  }
+}
+    `;
+export type SendMessageMutationFn = Apollo.MutationFunction<SendMessageMutation, SendMessageMutationVariables>;
+
+/**
+ * __useSendMessageMutation__
+ *
+ * To run a mutation, you first call `useSendMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSendMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [sendMessageMutation, { data, loading, error }] = useSendMessageMutation({
+ *   variables: {
+ *      content: // value for 'content'
+ *      receiverId: // value for 'receiverId'
+ *      senderId: // value for 'senderId'
+ *   },
+ * });
+ */
+export function useSendMessageMutation(baseOptions?: Apollo.MutationHookOptions<SendMessageMutation, SendMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SendMessageMutation, SendMessageMutationVariables>(SendMessageDocument, options);
+      }
+export type SendMessageMutationHookResult = ReturnType<typeof useSendMessageMutation>;
+export type SendMessageMutationResult = Apollo.MutationResult<SendMessageMutation>;
+export type SendMessageMutationOptions = Apollo.BaseMutationOptions<SendMessageMutation, SendMessageMutationVariables>;

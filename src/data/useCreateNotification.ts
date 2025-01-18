@@ -1,5 +1,5 @@
-import { gql } from '@apollo/client'
-import { useCreateNotificationMutation } from '@/generated/graphql'
+import { gql } from "@apollo/client";
+import { useCreateNotificationMutation } from "@/generated/graphql";
 
 gql`
   mutation CreateNotification(
@@ -8,6 +8,7 @@ gql`
     $email: String!
     $phone: String!
     $message: String!
+    $senderId: String!
   ) {
     createNotification(
       userId: $userId
@@ -15,6 +16,7 @@ gql`
       email: $email
       phone: $phone
       message: $message
+      senderId: $senderId
     ) {
       id
       message
@@ -22,13 +24,13 @@ gql`
       userId
     }
   }
-`
+`;
 
 export const useCreateNotification = () => {
   const [createNotification, { loading, error }] =
     useCreateNotificationMutation({
-      refetchQueries: ['Notifications']
-    })
+      refetchQueries: ["Notifications"],
+    });
 
-  return { createNotification, loading, error }
-}
+  return { createNotification, loading, error };
+};

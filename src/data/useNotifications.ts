@@ -10,6 +10,8 @@ gql`
     notifications(userId: $userId) {
       id
       message
+      senderId
+      userId
       sender {
         email
         name
@@ -24,6 +26,8 @@ gql`
       latestNotifications {
         id
         message
+        userId
+        senderId
         sender {
           name
           email
@@ -32,6 +36,8 @@ gql`
       newNotification {
         message
         id
+        userId
+        senderId
         sender {
           name
           email

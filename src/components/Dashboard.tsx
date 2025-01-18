@@ -1,16 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useNotifications } from "@/data/useNotifications";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 import { Card, CardContent, CardDescription } from "./ui/card";
 import { Button } from "./ui/button";
-import ChatWindow from "./chat-window";
+import ChatInterface from "./ChatInterface";
+import { useChat } from "@/context/ChatProvider";
+import { useCreateChatPartner } from "@/data/useCreateChatPartner";
 const Dashboard: React.FC = () => {
   const { user } = useUser();
   const { notifications } = useNotifications();
-
+  const { toggleChat } = useChat();
+  const [senderUser, setSenderUser] = useState<string | null>(null);
+  const { createChatPartner } = useCreateChatPartner();
   const { subscription, error, requestNotificationPermission } =
     usePushNotifications({ userId: user?.id || "" });
+
+  const handleStartChat = (senderId: string | undefined) => {
+    setSenderUser(senderId || "");
+    toggleChat(senderId || "");
+  };
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
@@ -38,7 +47,30 @@ const Dashboard: React.FC = () => {
                   </CardDescription>
                   <p>{subscription.message}</p>
                   <p>{subscription.sender?.name}</p>
-                  <Button className="mt-5">Start chat</Button>
+                  <p>senderId: {subscription.senderId}</p>
+                  <p>userId: {user?.id}</p>
+
+                  <Button
+                    className="mt-5"
+                    onClick={async () => {
+                      await createChatPartner({
+                        variables: {
+                          userId: user?.id || "",
+                          partnerId: subscription.senderId || "",
+                        },
+                      });
+
+                      await createChatPartner({
+                        variables: {
+                          userId: subscription.senderId || "",
+                          partnerId: user?.id || "",
+                        },
+                      });
+                      handleStartChat(subscription.senderId);
+                    }}
+                  >
+                    Start chat
+                  </Button>
                 </CardContent>
               </Card>
             ))
@@ -47,7 +79,6 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
-
       {!subscription && (
         <button
           onClick={() => requestNotificationPermission(user?.id || "")}
@@ -56,13 +87,12 @@ const Dashboard: React.FC = () => {
           Enable Push Notifications
         </button>
       )}
-
       {error && <p className="text-red-500">Error: {error}</p>}
-
       {subscription && (
         <p className="text-green-500">Push notifications enabled!</p>
       )}
-      <ChatWindow />
+
+      <ChatInterface receiverId={senderUser} />
     </div>
   );
 };

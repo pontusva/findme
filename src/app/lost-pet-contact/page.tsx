@@ -1,89 +1,89 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter
-} from '@/components/ui/card'
+  CardFooter,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from '@/components/ui/form'
-import { useCreateNotification } from '@/data/useCreateNotification'
-import { useParams } from 'react-router'
-import { usePushNotifications } from '@/hooks/usePushNotifications'
-import { useGetLostPetReport } from '@/data/useGetLostPetReport'
+  FormMessage,
+} from "@/components/ui/form";
+import { useCreateNotification } from "@/data/useCreateNotification";
+import { useParams } from "react-router";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useGetLostPetReport } from "@/data/useGetLostPetReport";
+import { useUser } from "@clerk/clerk-react";
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(1, 'Phone number is required'),
-  message: z.string().min(1, 'Message is required')
-})
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(1, "Phone number is required"),
+  message: z.string().min(1, "Message is required"),
+});
 
 export default function LostPetContactPage() {
-  const { id: reportId } = useParams()
-  const { lostPetReport, loading } = useGetLostPetReport(
-    reportId || ''
-  )
-  const { createNotification } = useCreateNotification()
+  const { id: reportId } = useParams();
+  const { lostPetReport, loading } = useGetLostPetReport(reportId || "");
+  const { createNotification } = useCreateNotification();
+  const { user } = useUser();
   const { subscription } = usePushNotifications({
-    userId: lostPetReport?.pet?.ownerId || ''
-  })
+    userId: lostPetReport?.pet?.ownerId || "",
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      message: ''
-    }
-  })
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
+    },
+  });
 
-  const onSubmit = async (
-    data: z.infer<typeof formSchema>
-  ) => {
-    if (!lostPetReport?.pet?.ownerId) return
-
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!lostPetReport?.pet?.ownerId) return;
+    console.log(lostPetReport.pet.ownerId);
     try {
       await createNotification({
         variables: {
           userId: lostPetReport.pet.ownerId,
-          ...data
-        }
-      })
+          senderId: user?.id || "",
+          ...data,
+        },
+      });
 
       if (subscription) {
-        await fetch('http://localhost:3000/push/send', {
-          method: 'POST',
+        await fetch("http://localhost:3000/push/send", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             subscription,
-            title: 'New Message About Your Pet',
-            body: `${data.name} has sent you a message about your pet`
-          })
-        })
+            title: "New Message About Your Pet",
+            body: `${data.name} has sent you a message about your pet`,
+          }),
+        });
       }
     } catch (error) {
-      console.error('Submission failed:', error)
+      console.error("Submission failed:", error);
     }
-  }
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -92,8 +92,7 @@ export default function LostPetContactPage() {
         <CardHeader>
           <CardTitle>Contact Pet Owner</CardTitle>
           <CardDescription>
-            Fill out this form to contact the owner of the
-            lost pet.
+            Fill out this form to contact the owner of the lost pet.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -106,10 +105,7 @@ export default function LostPetContactPage() {
                   <FormItem>
                     <FormLabel>Your Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your name"
-                        {...field}
-                      />
+                      <Input placeholder="Enter your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -159,10 +155,7 @@ export default function LostPetContactPage() {
                   <FormItem>
                     <FormLabel>Your Message</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Enter your message"
-                        {...field}
-                      />
+                      <Textarea placeholder="Enter your message" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,5 +171,5 @@ export default function LostPetContactPage() {
         </Form>
       </Card>
     </div>
-  )
+  );
 }
