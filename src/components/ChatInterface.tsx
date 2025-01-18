@@ -7,6 +7,7 @@ import { useGetChatPartners } from "@/data/useGetChatPartners";
 import { useSendMessage } from "@/data/useSendMessage";
 import { useAuth } from "@clerk/clerk-react";
 import { useGetChatMessages } from "@/data/useGetChatMessages";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 interface ChatInterfaceProps {
   receiverId: string | null;
 }
@@ -18,6 +19,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const { userId } = useAuth();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ [key: string]: any[] }>({});
+  const { subscription } = usePushNotifications({ userId: selectedUser || "" });
+  const getChatId = (userId1: string, userId2: string) => {
+    return userId1 < userId2
+      ? `${userId1}-${userId2}`
+      : `${userId2}-${userId1}`;
+  };
 
   const { data: subscriptionData } = useMessage(
     selectedUser || receiverId || "",
@@ -44,6 +51,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           receiverId: selectedUser,
           senderId: userId || "",
         },
+      });
+    }
+    if (subscription) {
+      await fetch("http://localhost:3000/push/sendMessageNotification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senderId: userId, // Assuming this is the ID of the sender
+          receiverId: selectedUser, // The recipient of the message
+          message: text, // The actual message content
+          chatId: getChatId(selectedUser || receiverId || "", userId || ""), // The ID of the chat
+        }),
       });
     }
   };
