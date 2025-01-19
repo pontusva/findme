@@ -4,19 +4,15 @@ import { useCreateNotificationMutation } from "@/generated/graphql";
 gql`
   mutation CreateNotification(
     $userId: String!
-    $name: String!
-    $email: String!
-    $phone: String!
     $message: String!
     $senderId: String!
+    $showEmail: Boolean!
   ) {
     createNotification(
       userId: $userId
-      name: $name
-      email: $email
-      phone: $phone
       message: $message
       senderId: $senderId
+      showEmail: $showEmail
     ) {
       id
       message

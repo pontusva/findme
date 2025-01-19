@@ -19,6 +19,8 @@ gql`
 `;
 
 export const useSendMessage = () => {
-  const [sendMessage, { loading, error }] = useSendMessageMutation();
+  const [sendMessage, { loading, error }] = useSendMessageMutation({
+    refetchQueries: ["GetChatMessages"],
+  });
   return { sendMessage, loading, error };
 };

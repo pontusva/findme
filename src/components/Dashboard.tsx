@@ -37,18 +37,18 @@ const Dashboard: React.FC = () => {
           <p>You haven't performed any searches yet.</p>
         </div>
         <div className="bg-yellow-100 p-4 max-h-80 overflow-y-auto rounded-md">
-          <h2 className="font-semibold">Subscriptions</h2>
+          <h2 className="font-semibold">Notifications</h2>
           {notifications.length > 0 ? (
             notifications.map((subscription, index) => (
               <Card className="mt-5" key={subscription.id + index}>
                 <CardContent className="mt-5">
                   <CardDescription>
-                    <p>{subscription.sender?.email}</p>
+                    <p>
+                      {subscription.showEmail && subscription.sender?.email}
+                    </p>
                   </CardDescription>
                   <p>{subscription.message}</p>
                   <p>{subscription.sender?.name}</p>
-                  <p>senderId: {subscription.senderId}</p>
-                  <p>userId: {user?.id}</p>
 
                   <Button
                     className="mt-5"
@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
               </Card>
             ))
           ) : (
-            <p>No active subscriptions at this time.</p>
+            <p>No notifications at this time.</p>
           )}
         </div>
       </div>

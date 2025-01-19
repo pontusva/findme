@@ -134,11 +134,9 @@ export type MutationCreateLostPetReportArgs = {
 
 
 export type MutationCreateNotificationArgs = {
-  email: Scalars['String']['input'];
   message: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  phone: Scalars['String']['input'];
   senderId: Scalars['String']['input'];
+  showEmail: Scalars['Boolean']['input'];
   userId: Scalars['String']['input'];
 };
 
@@ -196,6 +194,7 @@ export type Notification = {
   recipient?: Maybe<User>;
   sender?: Maybe<User>;
   senderId?: Maybe<Scalars['String']['output']>;
+  showEmail: Scalars['Boolean']['output'];
   userId: Scalars['String']['output'];
 };
 
@@ -378,11 +377,9 @@ export type CreateLostPetReportMutation = { __typename?: 'Mutation', createLostP
 
 export type CreateNotificationMutationVariables = Exact<{
   userId: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  email: Scalars['String']['input'];
-  phone: Scalars['String']['input'];
   message: Scalars['String']['input'];
   senderId: Scalars['String']['input'];
+  showEmail: Scalars['Boolean']['input'];
 }>;
 
 
@@ -472,14 +469,14 @@ export type NotificationsQueryVariables = Exact<{
 }>;
 
 
-export type NotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, senderId?: string, userId: string, sender?: { __typename?: 'User', email: string, name: string } }> };
+export type NotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, senderId?: string, showEmail: boolean, userId: string, sender?: { __typename?: 'User', email: string, name: string } }> };
 
 export type NotificationsSubscriptionSubscriptionVariables = Exact<{
   userId: Scalars['String']['input'];
 }>;
 
 
-export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications?: { __typename?: 'NotificationsPayload', latestNotifications: Array<{ __typename?: 'Notification', id: string, message: string, userId: string, senderId?: string, sender?: { __typename?: 'User', name: string, email: string } }>, newNotification: { __typename?: 'Notification', message: string, id: string, userId: string, senderId?: string, sender?: { __typename?: 'User', name: string, email: string } } } };
+export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications?: { __typename?: 'NotificationsPayload', latestNotifications: Array<{ __typename?: 'Notification', id: string, message: string, userId: string, showEmail: boolean, senderId?: string, sender?: { __typename?: 'User', name: string, email: string } }>, newNotification: { __typename?: 'Notification', message: string, id: string, userId: string, showEmail: boolean, senderId?: string, sender?: { __typename?: 'User', name: string, email: string } } } };
 
 export type SendMessageMutationVariables = Exact<{
   content: Scalars['String']['input'];
@@ -619,14 +616,12 @@ export type CreateLostPetReportMutationHookResult = ReturnType<typeof useCreateL
 export type CreateLostPetReportMutationResult = Apollo.MutationResult<CreateLostPetReportMutation>;
 export type CreateLostPetReportMutationOptions = Apollo.BaseMutationOptions<CreateLostPetReportMutation, CreateLostPetReportMutationVariables>;
 export const CreateNotificationDocument = gql`
-    mutation CreateNotification($userId: String!, $name: String!, $email: String!, $phone: String!, $message: String!, $senderId: String!) {
+    mutation CreateNotification($userId: String!, $message: String!, $senderId: String!, $showEmail: Boolean!) {
   createNotification(
     userId: $userId
-    name: $name
-    email: $email
-    phone: $phone
     message: $message
     senderId: $senderId
+    showEmail: $showEmail
   ) {
     id
     message
@@ -651,11 +646,9 @@ export type CreateNotificationMutationFn = Apollo.MutationFunction<CreateNotific
  * const [createNotificationMutation, { data, loading, error }] = useCreateNotificationMutation({
  *   variables: {
  *      userId: // value for 'userId'
- *      name: // value for 'name'
- *      email: // value for 'email'
- *      phone: // value for 'phone'
  *      message: // value for 'message'
  *      senderId: // value for 'senderId'
+ *      showEmail: // value for 'showEmail'
  *   },
  * });
  */
@@ -1196,6 +1189,7 @@ export const NotificationsDocument = gql`
     id
     message
     senderId
+    showEmail
     userId
     sender {
       email
@@ -1244,6 +1238,7 @@ export const NotificationsSubscriptionDocument = gql`
       id
       message
       userId
+      showEmail
       senderId
       sender {
         name
@@ -1254,6 +1249,7 @@ export const NotificationsSubscriptionDocument = gql`
       message
       id
       userId
+      showEmail
       senderId
       sender {
         name

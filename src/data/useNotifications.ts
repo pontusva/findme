@@ -11,6 +11,7 @@ gql`
       id
       message
       senderId
+      showEmail
       userId
       sender {
         email
@@ -27,6 +28,7 @@ gql`
         id
         message
         userId
+        showEmail
         senderId
         sender {
           name
@@ -37,6 +39,7 @@ gql`
         message
         id
         userId
+        showEmail
         senderId
         sender {
           name
@@ -92,7 +95,6 @@ export const useNotifications = () => {
                 }
               }
 
-              // Add latestNotifications if available
               if (latestNotifications) {
                 latestNotifications.forEach((newNotif) => {
                   if (
