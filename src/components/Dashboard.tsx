@@ -2,11 +2,22 @@ import React, { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useNotifications } from "@/data/useNotifications";
 import { usePushNotifications } from "../hooks/usePushNotifications";
-import { Card, CardContent, CardDescription } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import ChatInterface from "./ChatInterface";
 import { useChat } from "@/context/ChatProvider";
 import { useCreateChatPartner } from "@/data/useCreateChatPartner";
+import { useGetChatPartners } from "@/data/useGetChatPartners";
+import { useGetUserPets } from "@/data/useGetUserPets";
+import { Badge } from "./ui/badge";
+import { Link } from "react-router";
 const Dashboard: React.FC = () => {
   const { user } = useUser();
   const { notifications } = useNotifications();
@@ -15,6 +26,11 @@ const Dashboard: React.FC = () => {
   const { createChatPartner } = useCreateChatPartner();
   const { subscription, error, requestNotificationPermission } =
     usePushNotifications({ userId: user?.id || "" });
+  const { data: chatPartnersData } = useGetChatPartners();
+
+  const { data } = useGetUserPets({
+    userId: user?.id || "",
+  });
 
   const handleStartChat = (senderId: string | undefined) => {
     setSenderUser(senderId || "");
@@ -28,10 +44,45 @@ const Dashboard: React.FC = () => {
         Hello, {user?.firstName}! Here's your pet activity:
       </p>
       <div className="space-y-4">
-        <div className="bg-blue-100 p-4 rounded-md">
-          <h2 className="font-semibold">Your Reported Pets</h2>
-          <p>You have no currently reported lost pets.</p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Updates on your reported pets.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {data?.getUserPets.slice(0, 2).map((pet, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <div className="grid grid-cols-2 gap-4 w-[200px]">
+                    <span>{pet.name}</span>
+                  </div>
+                  <div>
+                    <Badge
+                      variant={
+                        pet.lostReports.map((report) =>
+                          report.status === "OPEN" ? "default" : "destructive"
+                        )[0]
+                      }
+                    >
+                      {pet.lostReports.map((report) => report.status)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground ml-2">
+                      {/* {pet.lostReports[0].lastSeenDate} */}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Link
+              to="/my-pets"
+              className="text-sm text-primary hover:underline"
+            >
+              View all my pets
+            </Link>
+          </CardFooter>
+        </Card>
         <div className="bg-green-100 p-4 rounded-md">
           <h2 className="font-semibold">Recent Searches</h2>
           <p>You haven't performed any searches yet.</p>
@@ -68,6 +119,9 @@ const Dashboard: React.FC = () => {
                       });
                       handleStartChat(subscription.senderId);
                     }}
+                    disabled={chatPartnersData?.getChatPartners.some(
+                      (partner) => partner.userId === subscription.userId
+                    )}
                   >
                     Start chat
                   </Button>
